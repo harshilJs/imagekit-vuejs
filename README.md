@@ -46,7 +46,7 @@ _Note: Do not include your Private Key in any client-side code, including this S
 
 Or, import components individually.
 ```
-import { IKImage, IKContext, IKUpload } from "imagekitio-vue"
+import { IKImage, IKContext, IKUpload, IKVideo } from "imagekitio-vue"
 
 export default {
   components: {
@@ -116,6 +116,13 @@ Vue.use(ImageKit, {
   loading="lazy"
   height="300"
   width="400"
+/>
+
+// Video element with basic transaformation, reduced quality by 50% using q:50
+<ik-video
+  :urlEndpoint="urlEndpoint"
+  :src="/default-video.mp4" 
+  :transformation="[{ height:300, width:400, q: 50 }]"
 />
 
 // File upload
@@ -381,6 +388,62 @@ Vue.use(ImageKit, {
 />
 ```
 
+## Video resizing
+
+The `IKVideo` component renders a `video` tag. It is used for rendering and manipulating videos in real-time. `IKVideo` component accepts the following props:
+
+| Prop             | Type | Description                    |
+| :----------------| :----|:----------------------------- |
+| urlEndpoint      | String | Optional. The base URL to be appended before the path of the video. If not specified, the URL-endpoint specified in the parent `IKContext` component is used. For example, https://ik.imagekit.io/your_imagekit_id/endpoint/ |
+| path             | String |Conditional. This is the path at which the video exists. For example, `/path/to/video.mp4`. Either the `path` or `src` parameter needs to be specified for URL generation. |
+| src              | String |Conditional. This is the complete URL of a video already mapped to ImageKit. For example, `https://ik.imagekit.io/your_imagekit_id/endpoint/path/to/video.mp4`. Either the `path` or `src` parameter needs to be specified for URL generation. |
+| transformation   | Array of objects |Optional. An array of objects specifying the transformation to be applied in the URL. The transformation name and the value should be specified as a key-value pair in the object. See list of [different tranformations](#list-of-supported-transformations). The complete list of supported transformations in the SDK and some examples of using them are given later. If you use a transformation name that is not specified in the SDK, it gets applied as it is in the URL. |
+| transformationPosition | String |Optional. The default value is path, which places the transformation string as a path parameter in the URL. It can also be specified as query, which adds the transformation string as the query parameter tr in the URL. If you use the src parameter to create the URL, then the transformation string is always added as a query parameter. |
+| queryParameters  | Object |Optional. These are the other query parameters that you want to add to the final URL. These can be any query parameters and are not necessarily related to ImageKit. Especially useful if you want to add some versioning parameters to your URLs. |
+
+### Basic video resizing examples
+
+```js
+<IKContext urlEndpoint="https://ik.imagekit.io/demo/your_imagekit_id">
+  // Video from related file path with no transformations - https://ik.imagekit.io/demo/your_imagekit_id/sample-video.mp4
+  <IKVideo
+    path="/sample-video.mp4"
+  />
+  // Video resizing - https://ik.imagekit.io/demo/your_imagekit_id/tr:w-h-300,w-400/sample-video.mp4
+  <IKVideo
+    path="/sample-video.mp4"
+    transformation={[{
+      height:300,
+      width:400
+    }]}
+  />
+  // Loading video from an absolute file path with no transformations - https://www.custom-domain.com/default-video.mp4
+  <IKVideo
+    src="https://www.custom-domain.com/default-video.mp4"
+  />
+  // Using a new tranformation parameter which is not there in this SDK yet - https://ik.imagekit.io/demo/your_imagekit_id/tr:custom-value/sample-video.mp4
+  <IKVideo
+    path="/sample-video.mp4"
+    transformation={[{
+      custom: 'value'
+    }]}
+  />
+</IKContext>
+```
+
+The `transformation` prop is an array of objects. Each object can have the following properties.
+
+```js
+// It means first resize the video to 400x400 and then rotate 90 degree
+transformation = [
+  {
+    height: 400,
+    width: 400,
+    rt: 90
+  }
+]
+```
+
 ## File Upload
 The SDK provides the `ik-upload` component to upload files to the [ImageKit Media Library](https://docs.imagekit.io/media-library/overview). 
 
@@ -395,6 +458,8 @@ The SDK provides the `ik-upload` component to upload files to the [ImageKit Medi
 | isPrivateFile | Boolean | Optional. Accepts `true` of `false`. The default value is `false`. Specify whether to mark the file as private or not. This is only relevant for image type files|
 | customCoordinates   | String | Optional. Define an important area in the image. This is only relevant for image type files. To be passed as a string with the `x` and `y` coordinates of the top-left corner, and `width` and `height` of the area of interest in format `x,y,width,height`. For example - `10,10,100,100` |
 | responseFields   | Array of string | Optional. Values of the fields that you want upload API to return in the response. For example, set the value of this field to `["tags", "customCoordinates", "isPrivateFile"]` to get value of `tags`, `customCoordinates`, and `isPrivateFile` in the response. |
+| onUploadStart | Function callback | Optional. Called before upload is started. The first and only argument is the HTML input's change event |
+| validateFile | Function callback | Optional. Called before upload is started to run custom validation. The first and only argument is the file selected for upload. If the callback returns `true`, the upload is allowed to continue. But, if it returns `false`, the upload is not done |
 | onSuccess   | Function callback | Optional. Called if the upload is successful. The first and only argument is the response JOSN from the upload API |
 | onError   | Function callback | Optional. Called if upload results in an error. The first and only argument is the error received from the upload API |
 | urlEndpoint      | String | Optional. If not specified, the URL-endpoint specified at the time of [SDK initialization](#initialization) is used. For example, https://ik.imagekit.io/your_imagekit_id/endpoint/ |
@@ -433,6 +498,12 @@ export default {
     return {};
   },
   methods: {
+    validateFile(res) {
+      console.log(res);
+    },
+    onUploadStart(evt) {
+      console.log('Started', evt);
+    },
     onError(err) {
       console.log("Error");
       console.log(err);

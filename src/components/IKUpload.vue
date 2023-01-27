@@ -23,7 +23,7 @@ export default {
     onError: { type: Function, required: false },
     onSuccess: { type: Function, required: false },
     validateFile: { type: Function, required: false },
-    // onUploadStart: { type: Function, required: false }
+    onUploadStart: { type: Function, required: false }
   },
   data() {
     return {
@@ -51,13 +51,18 @@ export default {
     },
     upload() {
       const file = this.$refs.imageFile.files[0];
-      console.log(this.validateFile && !this.validateFile(file),"----upload")
       if (!file) {
         return;
       }
+
+      if (this.onUploadStart && typeof this.onUploadStart === "function") {
+      this.onUploadStart(file);
+      }
+      
       if(this.validateFile && !this.validateFile(file)) {
         return
       }
+
       const fileSystemFileName = file.name;
 
       const mergedOptions = this.getMergedOptions();

@@ -79,7 +79,7 @@
     <IKVideo
       :urlEndpoint="urlEndpoint"
       :src="'https://ik.imagekit.io/demo/sample-video.mp4'"
-      :transformation="[{height:300,width:400}]"
+      :transformation="[{height:300,width:400,q:50}]"
     />
 
     <p>File upload</p>
@@ -89,6 +89,7 @@
         :onError="onError"
         :onSuccess="onSuccess"
         :validateFile="validateFile"
+        :onUploadStart="onUploadStart"
         customCoordinates="10,10,100,100"
       />
     
@@ -103,6 +104,8 @@
         :responseFields="['tags']"
         :onError="onError"
         :onSuccess="onSuccess"
+        :validateFile="validateFile"
+        :onUploadStart="onUploadStart"
         :useUniqueFileName=true
         :isPrivateFile=false
         customCoordinates="10,10,100,100"
@@ -157,6 +160,9 @@ export default {
         return true
       }
       return false
+    },
+    onUploadStart(evt) {
+      console.log(evt);
     }
   }
 };
