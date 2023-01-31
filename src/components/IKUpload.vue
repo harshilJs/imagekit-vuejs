@@ -49,15 +49,16 @@ export default {
           this.contextConfigurations.authenticationEndpoint
       });
     },
-    upload() {
+    upload(event) {
       const file = this.$refs.imageFile.files[0];
       if (!file) {
         return;
       }
 
+      this.$emit('onUploadStart', event)
       if (this.onUploadStart && typeof this.onUploadStart === "function") {
-      this.onUploadStart(file);
-      }
+      this.onUploadStart(event);
+      } 
       
       if(this.validateFile && !this.validateFile(file)) {
         return

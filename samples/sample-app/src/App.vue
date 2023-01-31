@@ -89,7 +89,7 @@
         :onError="onError"
         :onSuccess="onSuccess"
         :validateFile="validateFile"
-        :onUploadStart="onUploadStart"
+        @onUploadStart="onUploadStart"
         customCoordinates="10,10,100,100"
       />
     
@@ -161,8 +161,8 @@ export default {
       }
       return false
     },
-    onUploadStart(evt) {
-      console.log(evt);
+    onUploadStart(event) {
+      console.log(event.target.value);
     }
   }
 };
